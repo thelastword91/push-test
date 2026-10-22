@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>현장 알림</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="현장 알림">
+<meta name="theme-color" content="#1F5EFF">
+<style>
+  :root { --bg:#F4F6FA; --card:#fff; --text:#1A1D24; --sub:#5B6270; --line:#E3E7EE; --pri:#1F5EFF; --pri-weak:#EAF0FF; --ok:#12A150; --warn:#E5484D; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.55 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; -webkit-text-size-adjust:100%; }
+  main { max-width:480px; margin:0 auto; padding:24px 16px calc(32px + env(safe-area-inset-bottom)); }
+  header { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+  header img { width:44px; height:44px; border-radius:12px; }
+  header h1 { font-size:20px; margin:0; }
+  header p { margin:0; color:var(--sub); font-size:14px; }
+  .steps { display:flex; gap:6px; margin:0 0 16px; padding:0; list-style:none; }
+  .steps li { flex:1; text-align:center; font-size:12px; color:var(--sub); }
+  .steps li::before { content:""; display:block; height:4px; border-radius:2px; background:var(--line); margin-bottom:6px; }
+  .steps li.done::before, .steps li.now::before { background:var(--pri); }
+  .steps li.now { color:var(--pri); font-weight:700; }
+  .card { background:var(--card); border-radius:16px; padding:20px; box-shadow:0 1px 2px rgba(0,0,0,.04); margin-bottom:12px; }
+  .card h2 { font-size:18px; margin:0 0 6px; }
+  .card > p { margin:0 0 16px; color:var(--sub); }
+  .btn { display:block; width:100%; border:0; border-radius:12px; padding:15px; font-size:16px; font-weight:700; background:var(--pri); color:#fff; text-align:center; text-decoration:none; cursor:pointer; }
+  .btn.sub { background:var(--pri-weak); color:var(--pri); }
+  .btn + .btn { margin-top:8px; }
+  .how { list-style:none; margin:0; padding:0; counter-reset:n; }
+  .how li { counter-increment:n; display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-top:1px solid var(--line); }
+  .how li:first-child { border-top:0; padding-top:0; }
+  .how li::before { content:counter(n); flex:none; width:26px; height:26px; border-radius:50%; background:var(--pri-weak); color:var(--pri); font-weight:700; font-size:14px; display:grid; place-items:center; }
+  .how b { font-weight:700; }
+  .key { display:inline-flex; align-items:center; gap:4px; padding:1px 8px; border:1px solid var(--line); border-radius:8px; font-size:14px; background:#FAFBFD; white-space:nowrap; }
+  .key svg { width:15px; height:15px; }
+  .done-mark { display:flex; align-items:center; gap:8px; color:var(--ok); font-weight:700; margin-bottom:8px; }
+  .note { font-size:13px; color:var(--sub); margin-top:12px; }
+  .msg { border-left:4px solid var(--warn); padding:4px 0 4px 12px; margin:0 0 12px; }
+  .msg strong { display:block; }
+  textarea { width:100%; height:80px; font:12px/1.4 ui-monospace, monospace; border:1px solid var(--line); border-radius:10px; padding:10px; resize:none; margin-bottom:8px; color:var(--sub); }
+  .hidden { display:none; }
+  .arrow { position:fixed; left:50%; bottom:calc(8px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--text); color:#fff; font-size:13px; padding:8px 14px; border-radius:20px; animation:bob 1.2s ease-in-out infinite; }
+  @keyframes bob { 50% { transform:translate(-50%, -6px); } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="icon-192.png" alt="">
+    <div><h1>현장 알림</h1><p>점검 요청 · 대책 결정을 폰 알림으로 받아요</p></div>
+  </header>
+
+  <ol class="steps" id="steps">
+    <li data-s="open">브라우저 열기</li>
+    <li data-s="install">설치</li>
+    <li data-s="allow">알림 허용</li>
+  </ol>
+
+  <!-- 1. 카톡 안 브라우저 -->
+  <section class="card hidden" id="v-inapp">
+    <h2>카톡 밖에서 열어 주세요</h2>
+    <p>카톡 안에서는 앱을 설치할 수 없어요. 버튼을 누르면 폰 기본 브라우저로 열려요.</p>
+    <a class="btn" id="openExternal" href="#">브라우저로 열기</a>
+    <ol class="how note" id="inappManual"></ol>
+  </section>
+
+  <!-- 2a. 안드로이드 설치 -->
+  <section class="card hidden" id="v-android">
+    <h2>앱을 설치해 주세요</h2>
+    <p>설치하면 홈 화면에 아이콘이 생기고, 카톡 대신 앱 알림으로 받을 수 있어요.</p>
+    <button class="btn" id="installBtn">앱 설치</button>
+    <div id="androidManual" class="hidden">
+      <ol class="how">
+        <li><span>오른쪽 위 <span class="key">⋮</span> 를 눌러요</span></li>
+        <li><span><b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 눌러요</span></li>
+        <li><span>홈 화면에 생긴 <b>현장 알림</b> 아이콘으로 열어요</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 2b. 아이폰 설치 -->
+  <section class="card hidden" id="v-ios">
+    <h2>홈 화면에 추가해 주세요</h2>
+    <p>아이폰은 홈 화면에 추가한 앱으로만 알림을 받을 수 있어요. 세 번만 누르면 돼요.</p>
+    <ol class="how">
+      <li><span>화면 아래 <span class="key"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>공유</span> 를 눌러요. 안 보이면 <span class="key">⋯</span> 를 먼저 눌러요</span></li>
+      <li><span>목록을 올려 <b>홈 화면에 추가</b>를 눌러요</span></li>
+      <li><span><b>웹 앱으로 열기</b>가 켜진 채로 오른쪽 위 <b>추가</b>를 눌러요</span></li>
+    </ol>
+    <p class="note">추가한 뒤에는 이 창을 닫고 홈 화면의 <b>현장 알림</b> 아이콘으로 열어 주세요.</p>
+  </section>
+  <div class="arrow hidden" id="iosArrow">여기 아래에 공유 버튼이 있어요 ↓</div>
+
+  <!-- 2c. 아이폰 다른 브라우저 -->
+  <section class="card hidden" id="v-ios-other">
+    <h2>사파리에서 열어 주세요</h2>
+    <p>아이폰에서는 사파리에서 추가해야 알림이 와요.</p>
+    <button class="btn" id="copyUrl">주소 복사</button>
+    <p class="note">복사한 주소를 사파리 주소창에 붙여 넣어 주세요.</p>
+  </section>
+
+  <!-- 3. 알림 허용 -->
+  <section class="card hidden" id="v-allow">
+    <div class="done-mark">✓ 설치 완료</div>
+    <h2>알림을 켜 주세요</h2>
+    <p>점검 요청 · 대책 결정 같은 할 일이 생기면 바로 알려 드려요. 위험 경고는 지금처럼 카톡으로도 와요.</p>
+    <button class="btn" id="allowBtn">알림 받기</button>
+    <p class="note hidden" id="deniedNote">알림이 꺼져 있어요. 폰 설정 → 알림 → 현장 알림에서 켠 뒤 다시 눌러 주세요.</p>
+  </section>
+
+  <!-- 4. 완료 -->
+  <section class="card hidden" id="v-ready">
+    <div class="done-mark">✓ 알림 준비 끝</div>
+    <h2>이제 앱을 닫아도 알림이 와요</h2>
+    <p>지금 이 폰에 알림이 뜨는지 먼저 확인해 보세요.</p>
+    <button class="btn" id="localTest">시험 알림 띄우기</button>
+    <h2 style="margin-top:24px">시험용 구독 코드</h2>
+    <p>아래 코드를 기획자에게 보내 주면 PC에서 진짜 알림을 보내요.</p>
+    <textarea id="subCode" readonly></textarea>
+    <button class="btn" id="shareCode">카톡으로 보내기</button>
+    <button class="btn sub" id="copyCode">코드 복사</button>
+  </section>
+
+  <!-- 알림을 눌러 들어왔을 때 -->
+  <section class="card hidden" id="v-msg">
+    <h2>받은 알림</h2>
+    <div class="msg"><strong id="msgTitle"></strong><span id="msgBody"></span></div>
+    <p class="note" id="msgTime"></p>
+    <button class="btn sub" id="backBtn">처음 화면으로</button>
+  </section>
+</main>
+
+<script>
+const VAPID = 'BIgvcec2fyyhhDYcbhNjWft_y-uAemvLzhy0Db9vHo2tc6c33aGkruqUK2jXkwEGNwy-cnUHNwgqsKvflVJBvQo';
+const ua = navigator.userAgent;
+const isIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+const isAndroid = /Android/.test(ua);
+const isKakao = /KAKAOTALK/i.test(ua);
+const isInApp = isKakao || /NAVER|Instagram|FBAN|FBAV|Line\//.test(ua);
+const isIOSSafari = isIOS && !/CriOS|FxiOS|EdgiOS|Whale|NAVER/.test(ua) && !isInApp;
+const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const $ = id => document.getElementById(id);
+let deferredPrompt = null;
+
+function show(view, step) {
+  document.querySelectorAll('section.card').forEach(s => s.classList.add('hidden'));
+  $('iosArrow').classList.add('hidden');
+  $(view).classList.remove('hidden');
+  const order = ['open', 'install', 'allow'];
+  const idx = order.indexOf(step);
+  document.querySelectorAll('#steps li').forEach((li, i) => {
+    li.className = idx === -1 ? 'done' : i < idx ? 'done' : i === idx ? 'now' : '';
+  });
+}
+
+function b64ToUint8(b64) {
+  const s = atob((b64 + '='.repeat((4 - b64.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(s, c => c.charCodeAt(0));
+}
+
+async function readySub() {
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToUint8(VAPID) });
+  return sub;
+}
+
+async function showReady() {
+  show('v-ready');
+  const sub = await readySub();
+  $('subCode').value = 'SUB:' + btoa(JSON.stringify(sub.toJSON()));
+}
+
+function route() {
+  // 알림을 눌러 들어온 경우
+  const q = new URLSearchParams(location.search);
+  if (q.get('t')) {
+    $('msgTitle').textContent = q.get('t');
+    $('msgBody').textContent = q.get('b') || '';
+    $('msgTime').textContent = '받은 시각 ' + new Date().toLocaleString('ko-KR');
+    show('v-msg');
+    return;
+  }
+  if (isStandalone) {
+    if ('Notification' in window && Notification.permission === 'granted') showReady();
+    else show('v-allow', 'allow');
+    return;
+  }
+  if (isInApp) {
+    const url = location.href.split('#')[0];
+    $('openExternal').href = isKakao
+      ? 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url)
+      : isAndroid ? 'intent://' + url.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end' : url;
+    $('inappManual').innerHTML = isIOS
+      ? '<li><span>안 열리면 오른쪽 아래 <span class="key">⋯</span> 또는 <span class="key">공유</span> 를 눌러요</span></li><li><span><b>Safari로 열기</b>를 눌러요</span></li>'
+      : '<li><span>안 열리면 오른쪽 위 <span class="key">⋮</span> 를 눌러요</span></li><li><span><b>다른 브라우저로 열기</b>를 눌러요</span></li>';
+    show('v-inapp', 'open');
+    return;
+  }
+  if (isIOS) {
+    if (isIOSSafari) { show('v-ios', 'install'); $('iosArrow').classList.remove('hidden'); }
+    else show('v-ios-other', 'open');
+    return;
+  }
+  show('v-android', 'install');
+  if (!deferredPrompt) setTimeout(() => { if (!deferredPrompt) { $('installBtn').classList.add('hidden'); $('androidManual').classList.remove('hidden'); } }, 2500);
+}
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  $('installBtn').classList.remove('hidden');
+  $('androidManual').classList.add('hidden');
+});
+window.addEventListener('appinstalled', () => {
+  $('v-android').querySelector('p').textContent = '설치됐어요. 홈 화면의 현장 알림 아이콘으로 열어 주세요.';
+  $('installBtn').classList.add('hidden');
+});
+$('installBtn').onclick = async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+};
+$('copyUrl').onclick = async () => {
+  try { await navigator.clipboard.writeText(location.href.split('?')[0]); $('copyUrl').textContent = '복사했어요'; } catch (e) {}
+};
+$('allowBtn').onclick = async () => {
+  const p = await Notification.requestPermission();
+  if (p === 'granted') showReady();
+  else $('deniedNote').classList.remove('hidden');
+};
+$('localTest').onclick = async () => {
+  const reg = await navigator.serviceWorker.ready;
+  reg.showNotification('점검 요청', { body: '[시험] 현장관리자가 지중경사계 INC-03 점검을 요청했어요.', icon: 'icon-192.png', data: { url: './?t=' + encodeURIComponent('점검 요청') + '&b=' + encodeURIComponent('[시험] 현장관리자가 지중경사계 INC-03 점검을 요청했어요.') } });
+};
+$('copyCode').onclick = async () => {
+  try { await navigator.clipboard.writeText($('subCode').value); $('copyCode').textContent = '복사했어요'; }
+  catch (e) { $('subCode').select(); }
+};
+$('shareCode').onclick = async () => {
+  if (navigator.share) { try { await navigator.share({ text: $('subCode').value }); } catch (e) {} }
+  else $('copyCode').click();
+};
+$('backBtn').onclick = () => { history.replaceState(null, '', './'); route(); };
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+route();
+</script>
+</body>
+</html>
