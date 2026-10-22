@@ -42,7 +42,7 @@
   .msg strong { display:block; }
   textarea { width:100%; height:80px; font:12px/1.4 ui-monospace, monospace; border:1px solid var(--line); border-radius:10px; padding:10px; resize:none; margin-bottom:8px; color:var(--sub); }
   .hidden { display:none; }
-  .arrow { position:fixed; left:50%; bottom:calc(8px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--text); color:#fff; font-size:13px; padding:8px 14px; border-radius:20px; animation:bob 1.2s ease-in-out infinite; }
+  .arrow { position:fixed; left:50%; bottom:calc(8px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--text); color:#fff; font-size:13px; padding:8px 14px; border-radius:20px; white-space:nowrap; animation:bob 1.2s ease-in-out infinite; }
   @keyframes bob { 50% { transform:translate(-50%, -6px); } }
 </style>
 </head>
@@ -92,7 +92,7 @@
     </ol>
     <p class="note">추가한 뒤에는 이 창을 닫고 홈 화면의 <b>현장 알림</b> 아이콘으로 열어 주세요.</p>
   </section>
-  <div class="arrow hidden" id="iosArrow">여기 아래에 공유 버튼이 있어요 ↓</div>
+  <div class="arrow hidden" id="iosArrow">아래 공유 버튼부터 눌러요 ↓</div>
 
   <!-- 2c. 아이폰 다른 브라우저 -->
   <section class="card hidden" id="v-ios-other">
