@@ -5,9 +5,9 @@ self.addEventListener('fetch', () => {});
 
 self.addEventListener('push', e => {
   let d = {};
-  try { d = e.data.json(); } catch (err) { d = { title: '현장 알림', body: e.data ? e.data.text() : '' }; }
+  try { d = e.data.json(); } catch (err) { d = { title: 'ONSITE', body: e.data ? e.data.text() : '' }; }
   const url = './?t=' + encodeURIComponent(d.title || '') + '&b=' + encodeURIComponent(d.body || '');
-  e.waitUntil(self.registration.showNotification(d.title || '현장 알림', {
+  e.waitUntil(self.registration.showNotification(d.title || 'ONSITE', {
     body: d.body || '', icon: 'icon-192.png', badge: 'icon-192.png', data: { url }
   }));
 });

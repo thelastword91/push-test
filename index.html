@@ -3,36 +3,38 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>현장 알림</title>
+<title>ONSITE</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="현장 알림">
-<meta name="theme-color" content="#1F5EFF">
+<meta name="apple-mobile-web-app-title" content="ONSITE">
+<meta name="theme-color" content="#FFFFFF">
 <style>
-  :root { --bg:#F4F6FA; --card:#fff; --text:#1A1D24; --sub:#5B6270; --line:#E3E7EE; --pri:#1F5EFF; --pri-weak:#EAF0FF; --ok:#12A150; --warn:#E5484D; }
+  :root { --bg:#F3F4F6; --card:#FFFFFF; --text:#111827; --sub:#6B7280; --line:#E5E7EB; --pri:#1BB9CD; --pri-press:#23A1B1; --pri-weak:#EAF8FA; --ok:#009632; --warn:#FF4242; }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.55 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; -webkit-text-size-adjust:100%; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.55 "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; -webkit-text-size-adjust:100%; }
   main { max-width:480px; margin:0 auto; padding:24px 16px calc(32px + env(safe-area-inset-bottom)); }
-  header { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
-  header img { width:44px; height:44px; border-radius:12px; }
-  header h1 { font-size:20px; margin:0; }
+  header { margin:4px 0 24px; }
+  header img { height:20px; display:block; margin-bottom:14px; }
+  header h1 { font-size:22px; font-weight:700; margin:0 0 2px; }
   header p { margin:0; color:var(--sub); font-size:14px; }
   .steps { display:flex; gap:6px; margin:0 0 16px; padding:0; list-style:none; }
   .steps li { flex:1; text-align:center; font-size:12px; color:var(--sub); }
   .steps li::before { content:""; display:block; height:4px; border-radius:2px; background:var(--line); margin-bottom:6px; }
   .steps li.done::before, .steps li.now::before { background:var(--pri); }
-  .steps li.now { color:var(--pri); font-weight:700; }
-  .card { background:var(--card); border-radius:16px; padding:20px; box-shadow:0 1px 2px rgba(0,0,0,.04); margin-bottom:12px; }
-  .card h2 { font-size:18px; margin:0 0 6px; }
+  .steps li.now { color:var(--pri-press); font-weight:700; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:12px; }
+  .card h2 { font-size:18px; font-weight:700; margin:0 0 6px; }
   .card > p { margin:0 0 16px; color:var(--sub); }
-  .btn { display:block; width:100%; border:0; border-radius:12px; padding:15px; font-size:16px; font-weight:700; background:var(--pri); color:#fff; text-align:center; text-decoration:none; cursor:pointer; }
+  .btn { display:block; width:100%; border:0; border-radius:8px; padding:14px; font-size:16px; font-weight:600; font-family:inherit; background:var(--pri); color:#fff; text-align:center; text-decoration:none; cursor:pointer; }
+  .btn:active { background:var(--pri-press); }
   .btn.sub { background:var(--pri-weak); color:var(--pri); }
   .btn + .btn { margin-top:8px; }
   .how { list-style:none; margin:0; padding:0; counter-reset:n; }
   .how li { counter-increment:n; display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-top:1px solid var(--line); }
   .how li:first-child { border-top:0; padding-top:0; }
-  .how li::before { content:counter(n); flex:none; width:26px; height:26px; border-radius:50%; background:var(--pri-weak); color:var(--pri); font-weight:700; font-size:14px; display:grid; place-items:center; }
+  .how li::before { content:counter(n); flex:none; width:26px; height:26px; border-radius:50%; background:var(--pri-weak); color:var(--pri-press); font-weight:700; font-size:14px; display:grid; place-items:center; }
   .how b { font-weight:700; }
   .key { display:inline-flex; align-items:center; gap:4px; padding:1px 8px; border:1px solid var(--line); border-radius:8px; font-size:14px; background:#FAFBFD; white-space:nowrap; }
   .key svg { width:15px; height:15px; }
@@ -49,8 +51,8 @@
 <body>
 <main>
   <header>
-    <img src="icon-192.png" alt="">
-    <div><h1>현장 알림</h1><p>점검 요청 · 대책 결정을 폰 알림으로 받아요</p></div>
+    <img src="wordmark.svg" alt="MIDAS ONSITE">
+    <h1>앱 알림 받기</h1><p>점검 요청 · 대책 결정을 카톡 대신 앱 알림으로 받아요</p>
   </header>
 
   <ol class="steps" id="steps">
@@ -76,7 +78,7 @@
       <ol class="how">
         <li><span>오른쪽 위 <span class="key">⋮</span> 를 눌러요</span></li>
         <li><span><b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 눌러요</span></li>
-        <li><span>홈 화면에 생긴 <b>현장 알림</b> 아이콘으로 열어요</span></li>
+        <li><span>홈 화면에 생긴 <b>ONSITE</b> 아이콘으로 열어요</span></li>
       </ol>
     </div>
   </section>
@@ -90,7 +92,7 @@
       <li><span>목록을 올려 <b>홈 화면에 추가</b>를 눌러요</span></li>
       <li><span><b>웹 앱으로 열기</b>가 켜진 채로 오른쪽 위 <b>추가</b>를 눌러요</span></li>
     </ol>
-    <p class="note">추가한 뒤에는 이 창을 닫고 홈 화면의 <b>현장 알림</b> 아이콘으로 열어 주세요.</p>
+    <p class="note">추가한 뒤에는 이 창을 닫고 홈 화면의 <b>ONSITE</b> 아이콘으로 열어 주세요.</p>
   </section>
   <div class="arrow hidden" id="iosArrow">아래 공유 버튼부터 눌러요 ↓</div>
 
@@ -108,7 +110,7 @@
     <h2>알림을 켜 주세요</h2>
     <p>점검 요청 · 대책 결정 같은 할 일이 생기면 바로 알려 드려요. 위험 경고는 지금처럼 카톡으로도 와요.</p>
     <button class="btn" id="allowBtn">알림 받기</button>
-    <p class="note hidden" id="deniedNote">알림이 꺼져 있어요. 폰 설정 → 알림 → 현장 알림에서 켠 뒤 다시 눌러 주세요.</p>
+    <p class="note hidden" id="deniedNote">알림이 꺼져 있어요. 폰 설정 → 알림 → ONSITE에서 켠 뒤 다시 눌러 주세요.</p>
   </section>
 
   <!-- 4. 완료 -->
@@ -216,7 +218,7 @@ window.addEventListener('beforeinstallprompt', e => {
   $('androidManual').classList.add('hidden');
 });
 window.addEventListener('appinstalled', () => {
-  $('v-android').querySelector('p').textContent = '설치됐어요. 홈 화면의 현장 알림 아이콘으로 열어 주세요.';
+  $('v-android').querySelector('p').textContent = '설치됐어요. 홈 화면의 ONSITE 아이콘으로 열어 주세요.';
   $('installBtn').classList.add('hidden');
 });
 $('installBtn').onclick = async () => {
